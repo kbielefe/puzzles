@@ -7,6 +7,7 @@ def triangles(a: BigInt = 1, n: BigInt = 2): Stream[BigInt] =
 object Prime {
   def is(i: Long) =
     if (i == 2) true
+    else if (i < 2) false
     else if ((i & 1) == 0) false
     else prime(i)
 
