@@ -23,4 +23,29 @@ object Prime {
 
   private def prime(i: Long) =
     prime3 takeWhile (math.sqrt(i).>= _) forall { i % _ != 0 }
+
+  private def divides(d : Int, n : Int) = {
+    (n % d) == 0
+  }
+
+  private def ld(n : Int) : Int = {
+    ldf(2, n)
+  }
+
+  private def ldf(k : Int, n : Int) : Int = {
+    if (divides(k, n)) k
+    else if ((k*k) > n) n
+    else ldf((k+1), n)
+  }
+
+  def factors(n : Int) : List[Int] = n match {
+    case 1 => Nil;
+    case _ => {
+      val p = ld(n)
+      p :: factors(n / p)
+    }
+  }
+
+  def divisorCount(n: Int): Int =
+    factors(n).groupBy((x) => x).values.map(_.size + 1).product
 }
