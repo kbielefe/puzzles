@@ -48,6 +48,19 @@ object Prime {
 
   def divisorCount(n: Int): Int =
     factors(n).groupBy((x) => x).values.map(_.size + 1).product
+
+  def divisors(n: Int): Set[Int] = {
+    val primeFactors = factors(n)
+    divisors(primeFactors, primeFactors.size, Set(1))
+  }
+
+  private def divisors(primeFactors: List[Int], size: Int, result: Set[Int]): Set[Int] = {
+    if (size == 0)
+      return result
+    val combos = primeFactors.combinations(size)
+    val newDivisors = combos.map(_.product).toSet
+    divisors(primeFactors, size - 1, result ++ newDivisors)
+  }
 }
 
 object Collatz {
