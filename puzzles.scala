@@ -161,3 +161,6 @@ object WordNumbers {
     thousands(n) ++ hundreds(n) ++ andWord(n) ++ tens(n) ++ ones(n)
   }
 }
+
+// TODO:  Make x.digits
+def digits[T](x: T)(implicit n: Integral[T]) = x.toString map {_.asDigit}
