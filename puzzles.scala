@@ -50,38 +50,100 @@ object Prime {
     factors(n).groupBy((x) => x).values.map(_.size + 1).product
 }
 
-val collatzLengthCache = scala.collection.mutable.HashMap.empty[BigInt, BigInt]
+object Collatz {
+  private val cache = scala.collection.mutable.HashMap.empty[BigInt, BigInt]
 
-def collatzLength(n: BigInt, initialN: BigInt, length: BigInt = 1): BigInt = {
-  if (collatzLengthCache contains n) {
-    val result = length + collatzLengthCache(n) - 1
-    collatzLengthCache += ((initialN, result))
-    result
-  }
-  else if (n == 1) {
-    collatzLengthCache += ((initialN, length))
-    length
-  }
-  else if (n % 2 == 0)
-    collatzLength(n / 2, initialN, length + 1)
-  else
-    collatzLength(3 * n + 1, initialN, length + 1)
-}
-
-val pathCache = scala.collection.mutable.HashMap.empty[(Int, Int), BigInt]
-
-def countPaths(pos: (Int, Int)): BigInt = {
-  if (pathCache contains pos)
-    return pathCache(pos)
-
-  pos match {
-    case (0,  0) => 1
-    case (_, -1) => 0
-    case (-1, _) => 0
-    case (x,  y) => {
-      val result = countPaths((x-1, y)) + countPaths((x, y-1))
-      pathCache += ((pos, result))
+  def getLength(n: BigInt, initialN: BigInt, length: BigInt = 1): BigInt = {
+    if (cache contains n) {
+      val result = length + cache(n) - 1
+      cache += ((initialN, result))
       result
     }
+    else if (n == 1) {
+      cache += ((initialN, length))
+      length
+    }
+    else if (n % 2 == 0)
+      getLength(n / 2, initialN, length + 1)
+    else
+      getLength(3 * n + 1, initialN, length + 1)
+  }
+}
+
+object Paths {
+  private val cache = scala.collection.mutable.HashMap.empty[(Int, Int), BigInt]
+
+  def count(pos: (Int, Int)): BigInt = {
+    if (cache contains pos)
+      return cache(pos)
+
+    pos match {
+      case (0,  0) => 1
+      case (_, -1) => 0
+      case (-1, _) => 0
+      case (x,  y) => {
+        val result = count((x-1, y)) + count((x, y-1))
+        cache += ((pos, result))
+        result
+      }
+    }
+  }
+}
+
+object WordNumbers {
+  private val digitWords = Array("", "one", "two", "three", "four", "five", "six",
+    "seven", "eight", "nine")
+
+  private val teenWords = Array("ten", "eleven", "twelve", "thirteen", "fourteen", 
+    "fifteen", "sixteen", "seventeen", "eighteen", "nineteen")
+
+  private val tensWords = Array("", "ten", "twenty", "thirty", "forty", "fifty", 
+    "sixty", "seventy", "eighty", "ninety")
+
+  private def thousands(n: Int) = {
+    val digit = n / 1000
+    if (digit > 0)
+      digitWords(digit) ++ " thousand "
+    else
+      ""
+  }
+
+  private def hundreds(n: Int) = {
+    val digit = n % 1000 / 100
+    if (digit > 0)
+      digitWords(digit) ++ " hundred " 
+    else
+      ""
+  }
+
+  private def tens(n: Int) = {
+    val digit = n % 100 / 10
+    if (digit == 1)
+      teenWords(n % 10)
+    else if (digit > 0)
+      tensWords(digit) ++ "-"
+    else
+      ""
+  }
+
+  private def ones(n: Int) = {
+    val tensDigit = n % 100 / 10
+    val digit = n % 10
+    if (tensDigit != 1)
+      digitWords(digit)
+    else
+      ""
+  }
+
+  private def andWord(n: Int) = {
+    val tens = n % 100
+    if (tens != 0 && n > 99)
+      " and "
+    else
+      ""
+  }
+
+  def toWords(n: Int) = {
+    thousands(n) ++ hundreds(n) ++ andWord(n) ++ tens(n) ++ ones(n)
   }
 }
