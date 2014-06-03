@@ -68,12 +68,20 @@ def collatzLength(n: BigInt, initialN: BigInt, length: BigInt = 1): BigInt = {
     collatzLength(3 * n + 1, initialN, length + 1)
 }
 
-def countPaths(pos: (Int, Int)): Int = pos match {
-  case (0,  0) => 1
-  case (_, -1) => 0
-  case (-1, _) => 0
-  case (x,  y) => {
-    countPaths((x-1, y)) +
-    countPaths((x, y-1))
+val pathCache = scala.collection.mutable.HashMap.empty[(Int, Int), Int]
+
+def countPaths(pos: (Int, Int)): Int = {
+  if (pathCache contains pos)
+    return pathCache(pos)
+
+  pos match {
+    case (0,  0) => 1
+    case (_, -1) => 0
+    case (-1, _) => 0
+    case (x,  y) => {
+      val result = countPaths((x-1, y)) + countPaths((x, y-1))
+      pathCache += ((pos, result))
+      result
+    }
   }
 }
