@@ -49,3 +49,21 @@ object Prime {
   def divisorCount(n: Int): Int =
     factors(n).groupBy((x) => x).values.map(_.size + 1).product
 }
+
+val collatzLengthCache = scala.collection.mutable.HashMap.empty[BigInt, BigInt]
+
+def collatzLength(n: BigInt, initialN: BigInt, length: BigInt = 1): BigInt = {
+  if (collatzLengthCache contains n) {
+    val result = length + collatzLengthCache(n) - 1
+    collatzLengthCache += ((initialN, result))
+    result
+  }
+  else if (n == 1) {
+    collatzLengthCache += ((initialN, length))
+    length
+  }
+  else if (n % 2 == 0)
+    collatzLength(n / 2, initialN, length + 1)
+  else
+    collatzLength(3 * n + 1, initialN, length + 1)
+}
