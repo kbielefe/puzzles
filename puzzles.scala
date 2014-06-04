@@ -169,3 +169,5 @@ class PuzzleIntegral[T](value: T)(implicit n: Integral[T]) {
 import scala.language.implicitConversions
 implicit def puzzleIntegral[T](value: T)(implicit n: Integral[T]) =
   new PuzzleIntegral[T](value)
+
+def gcd(a: Int, b: Int): Int = if (b == 0) a.abs else gcd(b, a % b)
