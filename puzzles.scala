@@ -164,6 +164,7 @@ object WordNumbers {
 
 class PuzzleIntegral[T](value: T)(implicit n: Integral[T]) {
   def digits = value.toString map {_.asDigit}
+  def isPrime = Prime.is(n.toLong(value))
 }
 
 import scala.language.implicitConversions
@@ -171,3 +172,10 @@ implicit def puzzleIntegral[T](value: T)(implicit n: Integral[T]) =
   new PuzzleIntegral[T](value)
 
 def gcd(a: Int, b: Int): Int = if (b == 0) a.abs else gcd(b, a % b)
+
+def fac(n: Int, result: BigInt = 1): BigInt = {
+  if (n == 0)
+    result
+  else
+    fac(n - 1, n * result)
+}
