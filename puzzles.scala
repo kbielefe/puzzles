@@ -162,5 +162,10 @@ object WordNumbers {
   }
 }
 
-// TODO:  Make x.digits
-def digits[T](x: T)(implicit n: Integral[T]) = x.toString map {_.asDigit}
+class PuzzleIntegral[T](value: T)(implicit n: Integral[T]) {
+  def digits = value.toString map {_.asDigit}
+}
+
+import scala.language.implicitConversions
+implicit def puzzleIntegral[T](value: T)(implicit n: Integral[T]) =
+  new PuzzleIntegral[T](value)
