@@ -179,3 +179,21 @@ def fac(n: Int, result: BigInt = 1): BigInt = {
   else
     fac(n - 1, n * result)
 }
+
+def conditions(combo: Seq[String]) = {
+  def floor(person: String) = combo.indexOf(person)
+  def adjacent(person1: String, person2: String) = 
+    math.abs(floor(person1) - floor(person2)) == 1
+
+  floor("Baker")    != 4 &&
+  floor("Cooper")   != 0 &&
+  floor("Fletcher") != 0 &&
+  floor("Fletcher") != 4 &&
+  floor("Miller") > floor("Cooper") &&
+  !adjacent("Smith",  "Fletcher") &&
+  !adjacent("Cooper", "Fletcher")
+}
+  
+val people = Seq("Baker", "Cooper", "Fletcher", "Miller", "Smith")
+val result = people.permutations filter conditions
+result foreach println
