@@ -247,3 +247,16 @@ def digitsToInt(digits: Seq[Int]) =
 def circular(number: Int) = {
   rotations(number.digits) map digitsToInt forall (_.isPrime)
 }
+
+def truncations(number: Int) = {
+  val digits = number.digits
+  val left = for (i <- 0 until digits.size) yield digitsToInt(digits.slice(i, digits.size))
+  val right = for (i <- digits.size-1 to 1 by -1) yield digitsToInt(digits.slice(0, i))
+  left ++ right
+}
+
+def truncatable(number: Int) = {
+  val x = truncations(number)
+  val primeTruncations = x filter (_.isPrime)
+  x.size == primeTruncations.size
+}
