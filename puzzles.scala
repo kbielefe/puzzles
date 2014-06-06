@@ -1,3 +1,5 @@
+import scala.annotation.tailrec
+
 def fibs(a: BigInt = 0, b: BigInt = 1): Stream[BigInt] =
   a #:: fibs(b, a + b)
 
@@ -180,20 +182,52 @@ def fac(n: Int, result: BigInt = 1): BigInt = {
     fac(n - 1, n * result)
 }
 
-def conditions(combo: Seq[String]) = {
-  def floor(person: String) = combo.indexOf(person)
-  def adjacent(person1: String, person2: String) = 
-    math.abs(floor(person1) - floor(person2)) == 1
+def romanToInt(roman: String) = {
 
-  floor("Baker")    != 4 &&
-  floor("Cooper")   != 0 &&
-  floor("Fletcher") != 0 &&
-  floor("Fletcher") != 4 &&
-  floor("Miller") > floor("Cooper") &&
-  !adjacent("Smith",  "Fletcher") &&
-  !adjacent("Cooper", "Fletcher")
+  val digits = roman map Map(
+    'M' -> 1000,
+    'D' -> 500,
+    'C' -> 100,
+    'L' -> 50,
+    'X' -> 10,
+    'V' -> 5,
+    'I' -> 1)
+
+  val (prev, total) =
+    digits.foldLeft((1001, 0)){
+      case ((prev, total), digit) =>
+        if (digit > prev)
+          (digit, total + digit - 2 * prev)
+        else
+          (digit, total + digit)
+    }
+
+  total
 }
-  
-val people = Seq("Baker", "Cooper", "Fletcher", "Miller", "Smith")
-val result = people.permutations filter conditions
-result foreach println
+
+def intToRoman(number: Int): String = {
+  if (number <= 0) return ""
+
+  val conversions = List(
+    (1000, "M"),
+    (900,  "CM"),
+    (500,  "D"),
+    (400,  "CD"),
+    (100,  "C"),
+    (90,   "XC"),
+    (50,   "L"),
+    (40,   "XL"),
+    (10,   "X"),
+    (9,    "IX"),
+    (5,    "V"),
+    (4,    "IV"),
+    (1,    "I"))
+
+  val (decimal, roman) = 
+    (conversions dropWhile (_._1 > number)).head
+
+  roman + intToRoman(number - decimal)
+}
+
+def addRoman(val1: String, val2: String) =
+  intToRoman(romanToInt(val1) + romanToInt(val2))
