@@ -235,15 +235,15 @@ def permute[A](lists: List[List[A]]): Iterator[List[A]] = {
   for (x <- head.iterator; xs <- permute(tail)) yield x :: xs
 }
 
-def startsWithEnd(words: List[String]) = 
-  words sliding 2 forall ((word) => word(0).last == word(1).head)
+def rotations[A](list: Seq[A], count: Int = 0): List[Seq[A]] = {
+  if (count == list.size) return Nil
+  val (head, tail) = list.splitAt(count)
+  tail ++ head :: rotations(list, count + 1)
+}
 
-val words = List(
-    List("the", "that", "a"),
-    List("frog", "elephant", "thing"),
-    List("walked", "treaded", "grows"),
-    List("slowly", "quickly"))
+def digitsToInt(digits: Seq[Int]) =
+  digits.foldLeft(0)((total, digit) => total * 10 + digit)
 
-val results = permute(words) filter startsWithEnd
-
-results map (_ mkString " ") foreach println
+def circular(number: Int) = {
+  rotations(number.digits) map digitsToInt forall (_.isPrime)
+}
