@@ -173,8 +173,10 @@ import scala.language.implicitConversions
 implicit def puzzleIntegral[T](value: T)(implicit n: Integral[T]) =
   new PuzzleIntegral[T](value)
 
+@tailrec
 def gcd(a: Int, b: Int): Int = if (b == 0) a.abs else gcd(b, a % b)
 
+@tailrec
 def fac(n: Int, result: BigInt = 1): BigInt = {
   if (n == 0)
     result
@@ -193,16 +195,12 @@ def romanToInt(roman: String) = {
     'V' -> 5,
     'I' -> 1)
 
-  val (prev, total) =
-    digits.foldLeft((1001, 0)){
-      case ((prev, total), digit) =>
-        if (digit > prev)
-          (digit, total + digit - 2 * prev)
-        else
-          (digit, total + digit)
-    }
+  def inversion(digits: Seq[Int]) =
+    digits.size > 1 && digits(0) < digits(1)
 
-  total
+  val subtractive = digits sliding 2 filter inversion map (_.head)
+
+  digits.sum - subtractive.sum * 2
 }
 
 def intToRoman(number: Int): String = {
@@ -229,5 +227,23 @@ def intToRoman(number: Int): String = {
   roman + intToRoman(number - decimal)
 }
 
-def addRoman(val1: String, val2: String) =
-  intToRoman(romanToInt(val1) + romanToInt(val2))
+// Return an iterator through all combinations of one element
+// from each list, similar to amb operator.
+def permute[A](lists: List[List[A]]): Iterator[List[A]] = {
+  if (lists.isEmpty) return Iterator.single(Nil)
+  val head :: tail = lists
+  for (x <- head.iterator; xs <- permute(tail)) yield x :: xs
+}
+
+def startsWithEnd(words: List[String]) = 
+  words sliding 2 forall ((word) => word(0).last == word(1).head)
+
+val words = List(
+    List("the", "that", "a"),
+    List("frog", "elephant", "thing"),
+    List("walked", "treaded", "grows"),
+    List("slowly", "quickly"))
+
+val results = permute(words) filter startsWithEnd
+
+results map (_ mkString " ") foreach println
