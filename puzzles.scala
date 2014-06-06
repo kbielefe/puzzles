@@ -265,3 +265,8 @@ def pandigital(number: Int) = {
   val digits = number.digits
   digits.distinct.size == 9 && !(digits contains 0)
 }
+
+def perfectSquare(number: Int) = {
+  val sqrt = math.floor(math.sqrt(number)).toInt
+  sqrt * sqrt == number
+}
