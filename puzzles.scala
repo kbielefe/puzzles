@@ -260,3 +260,8 @@ def truncatable(number: Int) = {
   val primeTruncations = x filter (_.isPrime)
   x.size == primeTruncations.size
 }
+
+def pandigital(number: Int) = {
+  val digits = number.digits
+  digits.distinct.size == 9 && !(digits contains 0)
+}
