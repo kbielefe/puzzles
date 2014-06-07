@@ -1,7 +1,41 @@
 import scala.annotation.tailrec
 
-def fibs(a: BigInt = 0, b: BigInt = 1): Stream[BigInt] =
-  a #:: fibs(b, a + b)
+def fibs = new Iterator[BigInt] {
+  var a: BigInt = 1
+  var b: BigInt = 0
+  def hasNext = true
+  def next() = {
+    val result = a + b
+    a = b
+    b = result
+    result
+  }
+}
+
+def modFibs = new Iterator[Int] {
+  var a: Int = 1
+  var b: Int = 0
+  def hasNext = true
+  def next() = {
+    val result = (a + b) % 1000000000
+    a = b
+    b = result
+    result
+  }
+}
+
+def decimalFibs = new Iterator[BigDecimal] {
+  val mc = new java.math.MathContext(32, java.math.RoundingMode.FLOOR)
+  var a = BigDecimal(1, mc)
+  var b = BigDecimal(0, mc)
+  def hasNext = true
+  def next() = {
+    val result = (a + b)(mc)
+    a = b
+    b = result
+    result
+  }
+}
 
 def triangles(a: BigInt = 1, n: BigInt = 2): Stream[BigInt] =
   a #:: triangles(a + n, n + 1)
@@ -261,12 +295,44 @@ def truncatable(number: Int) = {
   x.size == primeTruncations.size
 }
 
-def pandigital(number: Int) = {
-  val digits = number.digits
-  digits.distinct.size == 9 && !(digits contains 0)
+def pandigital(number: Int, through: Int = 9) = {
+  number.digits.sorted == (1 to through)
+}
+
+def pandigitals(through: Int = 9) = {
+  (through to 1 by -1).permutations map digitsToInt
 }
 
 def perfectSquare(number: Int) = {
   val sqrt = math.floor(math.sqrt(number)).toInt
   sqrt * sqrt == number
 }
+
+def commaDelimitedFile(filename: String) = {
+  import scala.io.Source
+  val line = Source.fromFile(filename).getLines.next()
+  line split "," map (_.stripPrefix("\"").stripSuffix("\""))
+}
+
+def isTriangle(n: Int): Boolean = {
+  val x = 1 + 8 * n
+  if (!perfectSquare(x)) return false
+  val y = math.sqrt(x).toInt
+  (-1 + y) % 2 == 0
+}
+
+def time[A](f: => A) = {
+  val s = System.nanoTime
+  val ret = f
+  println("time: "+(System.nanoTime-s)/1e6+"ms")
+  ret
+}
+
+def pandigital(n: ((BigDecimal, Int), Int)) = n match {
+  case ((start, end), index) =>
+    start.toString.replaceAll("\\.", "").take(9).sorted == "123456789" &&
+    end.toString.takeRight(9).sorted == "123456789"
+}
+
+// Figure out better way to do 
+// res0 map ((x) => x map ((y) => y.toInt))
