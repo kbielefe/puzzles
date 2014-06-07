@@ -9,6 +9,9 @@ object CodeJam {
     def intSeq() = 
       lines.next() split " " map (_.toInt)
 
+    def doubleSeq() = 
+      lines.next() split " " map (_.toDouble)
+
     def intSet() = intSeq().toSet
 
     def countIter[A](f: => A): Iterator[A] = {
@@ -21,15 +24,15 @@ object CodeJam {
     }
   }
 
-  def formatCases(cases: Iterator[String]) = {
-    val indexed = cases.zipWithIndex
+  def formatCases[A](cases: Iterator[A]) = {
+    val indexed = cases.map(_.toString).zipWithIndex
     indexed map {case (output, index) =>
       s"Case #${index + 1}: ${output}"
     }
   }
 
   def main(args: Array[String] = Array("Sample")) = {
-    val filename = args(0)
+    val filename = args(0).stripSuffix(".in")
     val out = if (args.size > 1 && args(1) == "-f")
         new java.io.PrintStream(filename + ".out")
       else
@@ -41,21 +44,31 @@ object CodeJam {
     output foreach out.println
   }
 
-  def testCase(parser: Parser): String = {
-    def choice() = {
-      val row = parser.int()
-      val rows = parser.repeat(4)(parser.intSet)
-      rows.toVector(row-1)
-    }
-      
-    val choices = parser.repeat(2)(choice)
+  case class State(
+    rate: Double, cookies: Double, time: Double,
+    c: Double, f: Double, x: Double) {
 
-    val result = choices.next() & choices.next()
+    def dontBuyWinTime = (x - cookies) / rate
 
-    result.size match {
-      case 0 => "Volunteer cheated!"
-      case 1 => result.head.toString
-      case _ => "Bad magician!"
+    def buyTime = (c - cookies) / rate
+
+    def buyWinTime = buyTime + x / (rate + f)
+
+    def buy = State(rate + f, 0.0, time + buyTime,
+      c, f, x)
+  }
+
+  def testCase(parser: Parser): Double = {
+    def solve(state: State): Double = {
+      if (state.buyWinTime > state.dontBuyWinTime)
+        state.dontBuyWinTime + state.time
+      else
+        solve(state.buy)
     }
+
+    val Array(c, f, x) = parser.doubleSeq()
+    val initialState = State(2.0, 0.0, 0.0, c, f, x)
+
+    solve(initialState)
   }
 }
