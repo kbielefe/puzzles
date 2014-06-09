@@ -414,53 +414,57 @@ def getHands(line: String) = {
   cards.splitAt(5)
 }
 
-def tiebreaker(hand: Array[Card]) = {
-  val groupSizes = hand.groupBy(_.rank) mapValues (_.size)
-  groupSizes.toSeq.sortBy(_._1).sortBy(_._2).reverse map (_._1)
+object Score extends Enumeration {
+  val HighCard, Pair, TwoPair, ThreeOfAKind, Straight,
+    Flush, FullHouse, FourOfAKind, FlushStraight = Value
 }
 
-def evaluateHand(hand: Array[Card]): Int = {
-  val flush = hand.map(_.suit).distinct.size == 1
-  val sorted = hand.map(_.rank).sorted
+def tiebreaker(hand: Array[Card]) = {
+  val groupSizes        = hand.groupBy(_.rank) mapValues (_.size)
+  val sortedByRank      = groupSizes.toSeq.sortBy(_._1)
+  val sortedByGroupSize = sortedByRank.sortBy(_._2)
+  val ranksOnly         = sortedByGroupSize.reverse.map(_._1)
+  ranksOnly.toList
+}
+
+def evaluateHand(hand: Array[Card]): Score.Value = {
+  val sorted   = hand.map(_.rank).sorted
+
+  val flush    = hand.map(_.suit).distinct.size == 1
   val straight = sorted sliding 2 forall ((x) => x(1) - x(0) == 1)
-  val groups = hand.groupBy(_.rank).values.map(_.size)
+
+  val groups   = hand.groupBy(_.rank).values.map(_.size)
   def containsGroupOf(n: Int) = groups.exists(_ == n)
 
-  if (flush && straight) return 9
-  if (containsGroupOf(4)) return 8
+  import Score._
+  if (flush && straight)         return FlushStraight
+  if (containsGroupOf(4))        return FourOfAKind
   if (containsGroupOf(3) && 
-      containsGroupOf(2)) return 7
-  if (flush)             return 6
-  if (straight)          return 5
-  if (containsGroupOf(3)) return 4
-  if (groups.count(_ == 2) == 2) return 3
-  if (containsGroupOf(2)) return 2
-  return 1
+      containsGroupOf(2))        return FullHouse
+  if (flush)                     return Flush
+  if (straight)                  return Straight
+  if (containsGroupOf(3))        return ThreeOfAKind
+  if (groups.count(_ == 2) == 2) return TwoPair
+  if (containsGroupOf(2))        return Pair 
+                                 return HighCard
+}
+
+def winner(game: (Array[Card], Array[Card])): Boolean = {
+  val (hand1, hand2) = game
+  val score1 = evaluateHand(hand1).id :: tiebreaker(hand1)
+  val score2 = evaluateHand(hand2).id :: tiebreaker(hand2)
+
+  lexCompare(score1, score2)
 }
 
 @tailrec
-def lexCompare(tie1: Seq[Int], tie2: Seq[Int]): Boolean = {
+def lexCompare(tie1: List[Int], tie2: List[Int]): Boolean = {
   if (tie1.head > tie2.head)
     return true
   else if (tie2.head > tie1.head)
     return false
 
   lexCompare(tie1.tail, tie2.tail)
-}
-
-def winner(game: (Array[Card], Array[Card])): Boolean = {
-  val (hand1, hand2) = game
-  val score1 = evaluateHand(hand1)
-  val score2 = evaluateHand(hand2)
-  if (score1 > score2)
-    return true
-  else if (score2 > score1)
-    return false
-
-  val tie1 = tiebreaker(hand1)
-  val tie2 = tiebreaker(hand2)
-
-  lexCompare(tie1, tie2)
 }
 
 import scala.io.Source
