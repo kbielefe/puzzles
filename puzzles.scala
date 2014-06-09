@@ -391,3 +391,79 @@ def diophantine(x0: BigInt, y0: BigInt,
 def triangleAndPentagonal = diophantine(0, 0, -2, -3, -1, -1, -2, 0)
 
 def ncr(n: Int, r: Int) = fac(n) / fac(r) / fac(n-r)
+
+case class Card(rank: Int, suit: Char)
+
+def cardFromString(string: String) = {
+  val rank = string(0) match {
+    case 'T' => 10
+    case 'J' => 11
+    case 'Q' => 12
+    case 'K' => 13
+    case 'A' => 14
+    case x => x.asDigit
+  }
+
+  val suit = string(1)
+
+  Card(rank, suit)
+}
+
+def getHands(line: String) = {
+  val cards = line split " " map cardFromString
+  cards.splitAt(5)
+}
+
+def tiebreaker(hand: Array[Card]) = {
+  val groupSizes = hand.groupBy(_.rank) mapValues (_.size)
+  groupSizes.toSeq.sortBy(_._1).sortBy(_._2).reverse map (_._1)
+}
+
+def evaluateHand(hand: Array[Card]): Int = {
+  val flush = hand.map(_.suit).distinct.size == 1
+  val sorted = hand.map(_.rank).sorted
+  val straight = sorted sliding 2 forall ((x) => x(1) - x(0) == 1)
+  val groups = hand.groupBy(_.rank).values.map(_.size)
+  def containsGroupOf(n: Int) = groups.exists(_ == n)
+
+  if (flush && straight) return 9
+  if (containsGroupOf(4)) return 8
+  if (containsGroupOf(3) && 
+      containsGroupOf(2)) return 7
+  if (flush)             return 6
+  if (straight)          return 5
+  if (containsGroupOf(3)) return 4
+  if (groups.count(_ == 2) == 2) return 3
+  if (containsGroupOf(2)) return 2
+  return 1
+}
+
+@tailrec
+def lexCompare(tie1: Seq[Int], tie2: Seq[Int]): Boolean = {
+  if (tie1.head > tie2.head)
+    return true
+  else if (tie2.head > tie1.head)
+    return false
+
+  lexCompare(tie1.tail, tie2.tail)
+}
+
+def winner(game: (Array[Card], Array[Card])): Boolean = {
+  val (hand1, hand2) = game
+  val score1 = evaluateHand(hand1)
+  val score2 = evaluateHand(hand2)
+  if (score1 > score2)
+    return true
+  else if (score2 > score1)
+    return false
+
+  val tie1 = tiebreaker(hand1)
+  val tie2 = tiebreaker(hand2)
+
+  lexCompare(tie1, tie2)
+}
+
+import scala.io.Source
+val lines = Source.fromFile("poker.txt").getLines
+val games = lines map getHands
+games.count(winner)
