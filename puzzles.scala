@@ -389,3 +389,5 @@ def diophantine(x0: BigInt, y0: BigInt,
 }
 
 def triangleAndPentagonal = diophantine(0, 0, -2, -3, -1, -1, -2, 0)
+
+def ncr(n: Int, r: Int) = fac(n) / fac(r) / fac(n-r)
