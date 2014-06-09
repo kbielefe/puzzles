@@ -37,8 +37,7 @@ def decimalFibs = new Iterator[BigDecimal] {
   }
 }
 
-def triangles(a: BigInt = 1, n: BigInt = 2): Stream[BigInt] =
-  a #:: triangles(a + n, n + 1)
+def triangles = Iterator.from(1).map((n) => n * (n + 1) /2)
 
 object Prime {
   def is(i: Long) =
@@ -303,13 +302,6 @@ def pandigitals(through: Int = 9) = {
   (through to 1 by -1).permutations map digitsToInt
 }
 
-def perfectSquare(number: Int): Boolean = {
-  if (number < 0)
-    return false
-  val sqrt = math.floor(math.sqrt(number)).toInt
-  sqrt * sqrt == number
-}
-
 def commaDelimitedFile(filename: String) = {
   import scala.io.Source
   val line = Source.fromFile(filename).getLines.next()
@@ -329,27 +321,71 @@ def pandigital(n: ((BigDecimal, Int), Int)) = n match {
     end.toString.takeRight(9).sorted == "123456789"
 }
 
+// http://www.codecodex.com/wiki/Calculate_an_integer_square_root
+def sqrt(number : BigInt) = {
+  def next(n : BigInt, i : BigInt) : BigInt = (n + i/n) >> 1
+ 
+  val one = BigInt(1)
+ 
+  var n = one
+  var n1 = next(n, number)
+     
+  while ((n1 - n).abs > one) {
+    n = n1
+    n1 = next(n, number)
+  }
+      
+  while (n1 * n1 > number) {
+    n1 -= one
+  }
+      
+  n1
+}
+
+def perfectSquare(number: BigInt): Boolean = {
+  if (number < 0)
+    return false
+  val result = sqrt(number)
+  result * result == number
+}
+
 // Returns true if has a positive integer solution to the quadratic equation
-def naturalQuadratic(a: Int, b: Int, c: Int): Boolean = {
+def naturalQuadratic(a: BigInt, b: BigInt, c: BigInt): Boolean = {
   val discriminant = b * b - 4 * a * c
   if (!perfectSquare(discriminant))
     return false
 
-  val plus = -b + math.sqrt(discriminant).toInt
+  val plus = -b + sqrt(discriminant)
   if (plus % (2 * a) == 0 && (plus * a) > 0)
     return true
 
-  val minus = -b - math.sqrt(discriminant).toInt
+  val minus = -b - sqrt(discriminant)
   if (minus % (2 * a) == 0 && (minus * a) > 0)
     return true
 
   false
 }
 
-def pentagonals(n: Int = 1): Stream[Int] = (n * (3 * n - 1) / 2) #:: pentagonals(n + 1)
+def isPentagonal(n: BigInt) = naturalQuadratic(3, -1, -2*n)
 
-def isPentagonal(n: Int) = naturalQuadratic(3, -1, -2*n)
+def isHexagonal(n: BigInt) = naturalQuadratic(2, -1, -n)
+
+def isTriangular(n: BigInt) = naturalQuadratic(1, 1, -2*n)
 
 // Figure out better way to do 
 // res0 map ((x) => x map ((y) => y.toInt))
 
+// Generates a sequence based on parameters from
+// http://www.alpertron.com.ar/QUAD.HTM
+def diophantine(x0: BigInt, y0: BigInt, 
+  p: BigInt, q: BigInt, k: BigInt, r: BigInt,
+  s: BigInt, l: BigInt) = {
+
+  def nextX(prevX: BigInt, prevY: BigInt) = p * prevX + q * prevY + k
+  def nextY(prevX: BigInt, prevY: BigInt) = r * prevX + s * prevY + l
+
+  val iter = Iterator.iterate((x0, y0)){case (x, y) => (nextX(x, y), nextY(x, y))}
+  iter filter {case (x, y) => x > 0 && y > 0}
+}
+
+def triangleAndPentagonal = diophantine(0, 0, -2, -3, -1, -1, -2, 0)
