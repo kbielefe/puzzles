@@ -303,7 +303,9 @@ def pandigitals(through: Int = 9) = {
   (through to 1 by -1).permutations map digitsToInt
 }
 
-def perfectSquare(number: Int) = {
+def perfectSquare(number: Int): Boolean = {
+  if (number < 0)
+    return false
   val sqrt = math.floor(math.sqrt(number)).toInt
   sqrt * sqrt == number
 }
@@ -312,13 +314,6 @@ def commaDelimitedFile(filename: String) = {
   import scala.io.Source
   val line = Source.fromFile(filename).getLines.next()
   line split "," map (_.stripPrefix("\"").stripSuffix("\""))
-}
-
-def isTriangle(n: Int): Boolean = {
-  val x = 1 + 8 * n
-  if (!perfectSquare(x)) return false
-  val y = math.sqrt(x).toInt
-  (-1 + y) % 2 == 0
 }
 
 def time[A](f: => A) = {
@@ -334,5 +329,27 @@ def pandigital(n: ((BigDecimal, Int), Int)) = n match {
     end.toString.takeRight(9).sorted == "123456789"
 }
 
+// Returns true if has a positive integer solution to the quadratic equation
+def naturalQuadratic(a: Int, b: Int, c: Int): Boolean = {
+  val discriminant = b * b - 4 * a * c
+  if (!perfectSquare(discriminant))
+    return false
+
+  val plus = -b + math.sqrt(discriminant).toInt
+  if (plus % (2 * a) == 0 && (plus * a) > 0)
+    return true
+
+  val minus = -b - math.sqrt(discriminant).toInt
+  if (minus % (2 * a) == 0 && (minus * a) > 0)
+    return true
+
+  false
+}
+
+def pentagonals(n: Int = 1): Stream[Int] = (n * (3 * n - 1) / 2) #:: pentagonals(n + 1)
+
+def isPentagonal(n: Int) = naturalQuadratic(3, -1, -2*n)
+
 // Figure out better way to do 
 // res0 map ((x) => x map ((y) => y.toInt))
+
