@@ -392,82 +392,31 @@ def triangleAndPentagonal = diophantine(0, 0, -2, -3, -1, -1, -2, 0)
 
 def ncr(n: Int, r: Int) = fac(n) / fac(r) / fac(n-r)
 
-case class Card(rank: Int, suit: Char)
-
-def cardFromString(string: String) = {
-  val rank = string(0) match {
-    case 'T' => 10
-    case 'J' => 11
-    case 'Q' => 12
-    case 'K' => 13
-    case 'A' => 14
-    case x => x.asDigit
+// Returns the convergents of continued fractions
+def convergents(terms: Iterator[BigInt]) = new Iterator[(BigInt, BigInt)] {
+  var a: (BigInt, BigInt) = (0, 1)
+  var b: (BigInt, BigInt) = (1, 0)
+  def hasNext = terms.hasNext
+  def next() = {
+    val term = terms.next()
+    val result = (term * b._1 + a._1, term * b._2 + a._2)
+    a = b
+    b = result
+    result
   }
-
-  val suit = string(1)
-
-  Card(rank, suit)
 }
 
-def getHands(line: String) = {
-  val cards = line split " " map cardFromString
-  cards.splitAt(5)
+// [2; 1,2,1, 1,4,1, 1,6,1, ... , 1,2k,1, ...]
+def eContinuedFractionTerms = new Iterator[BigInt] {
+  var n = 0
+  def hasNext = true
+  def next() = {
+    n = n + 1
+    if (n == 1)
+      2
+    else if (n % 3 == 0)
+      n / 3 * 2
+    else
+      1
+  }
 }
-
-object Score extends Enumeration {
-  val HighCard, Pair, TwoPair, ThreeOfAKind, Straight,
-    Flush, FullHouse, FourOfAKind, FlushStraight = Value
-}
-
-def tiebreaker(hand: Array[Card]) = {
-  val groupSizes        = hand.groupBy(_.rank) mapValues (_.size)
-  val sortedByRank      = groupSizes.toSeq.sortBy(_._1)
-  val sortedByGroupSize = sortedByRank.sortBy(_._2)
-  val ranksOnly         = sortedByGroupSize.reverse.map(_._1)
-  ranksOnly.toList
-}
-
-def evaluateHand(hand: Array[Card]): Score.Value = {
-  val sorted   = hand.map(_.rank).sorted
-
-  val flush    = hand.map(_.suit).distinct.size == 1
-  val straight = sorted sliding 2 forall ((x) => x(1) - x(0) == 1)
-
-  val groups   = hand.groupBy(_.rank).values.map(_.size)
-  def containsGroupOf(n: Int) = groups.exists(_ == n)
-
-  import Score._
-  if (flush && straight)         return FlushStraight
-  if (containsGroupOf(4))        return FourOfAKind
-  if (containsGroupOf(3) && 
-      containsGroupOf(2))        return FullHouse
-  if (flush)                     return Flush
-  if (straight)                  return Straight
-  if (containsGroupOf(3))        return ThreeOfAKind
-  if (groups.count(_ == 2) == 2) return TwoPair
-  if (containsGroupOf(2))        return Pair 
-                                 return HighCard
-}
-
-def winner(game: (Array[Card], Array[Card])): Boolean = {
-  val (hand1, hand2) = game
-  val score1 = evaluateHand(hand1).id :: tiebreaker(hand1)
-  val score2 = evaluateHand(hand2).id :: tiebreaker(hand2)
-
-  lexCompare(score1, score2)
-}
-
-@tailrec
-def lexCompare(tie1: List[Int], tie2: List[Int]): Boolean = {
-  if (tie1.head > tie2.head)
-    return true
-  else if (tie2.head > tie1.head)
-    return false
-
-  lexCompare(tie1.tail, tie2.tail)
-}
-
-import scala.io.Source
-val lines = Source.fromFile("poker.txt").getLines
-val games = lines map getHands
-games.count(winner)
