@@ -1,43 +1,6 @@
+object Puzzles {
+
 import scala.annotation.tailrec
-
-def fibs = new Iterator[BigInt] {
-  var a: BigInt = 1
-  var b: BigInt = 0
-  def hasNext = true
-  def next() = {
-    val result = a + b
-    a = b
-    b = result
-    result
-  }
-}
-
-def modFibs = new Iterator[Int] {
-  var a: Int = 1
-  var b: Int = 0
-  def hasNext = true
-  def next() = {
-    val result = (a + b) % 1000000000
-    a = b
-    b = result
-    result
-  }
-}
-
-def decimalFibs = new Iterator[BigDecimal] {
-  val mc = new java.math.MathContext(32, java.math.RoundingMode.FLOOR)
-  var a = BigDecimal(1, mc)
-  var b = BigDecimal(0, mc)
-  def hasNext = true
-  def next() = {
-    val result = (a + b)(mc)
-    a = b
-    b = result
-    result
-  }
-}
-
-def triangles = Iterator.from(1).map((n) => n * (n + 1) /2)
 
 object Prime {
   def is(i: Long) =
@@ -206,6 +169,45 @@ import scala.language.implicitConversions
 implicit def puzzleIntegral[T](value: T)(implicit n: Integral[T]) =
   new PuzzleIntegral[T](value)
 
+def fibs = new Iterator[BigInt] {
+  var a: BigInt = 1
+  var b: BigInt = 0
+  def hasNext = true
+  def next() = {
+    val result = a + b
+    a = b
+    b = result
+    result
+  }
+}
+
+def modFibs = new Iterator[Int] {
+  var a: Int = 1
+  var b: Int = 0
+  def hasNext = true
+  def next() = {
+    val result = (a + b) % 1000000000
+    a = b
+    b = result
+    result
+  }
+}
+
+def decimalFibs = new Iterator[BigDecimal] {
+  val mc = new java.math.MathContext(32, java.math.RoundingMode.FLOOR)
+  var a = BigDecimal(1, mc)
+  var b = BigDecimal(0, mc)
+  def hasNext = true
+  def next() = {
+    val result = (a + b)(mc)
+    a = b
+    b = result
+    result
+  }
+}
+
+def triangles = Iterator.from(1).map((n) => n * (n + 1) /2)
+
 @tailrec
 def gcd(a: Int, b: Int): Int = if (b == 0) a.abs else gcd(b, a % b)
 
@@ -266,6 +268,12 @@ def permute[A](lists: List[List[A]]): Iterator[List[A]] = {
   if (lists.isEmpty) return Iterator.single(Nil)
   val head :: tail = lists
   for (x <- head.iterator; xs <- permute(tail)) yield x :: xs
+}
+
+// Iterate through permutations of n elements from the list
+def permutations[A](n: Int)(list: Iterable[A]): Iterator[List[A]] = {
+  if (n == 0) return Iterator.single(Nil)
+  for (x <- list.iterator; xs <- permutations(n-1)(list)) yield x :: xs
 }
 
 def rotations[A](list: Seq[A], count: Int = 0): List[Seq[A]] = {
@@ -419,4 +427,5 @@ def eContinuedFractionTerms = new Iterator[BigInt] {
     else
       1
   }
+}
 }
