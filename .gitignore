@@ -4,3 +4,6 @@
 *.out
 *.txt
 problem*.scala
+*.hi
+*.o
+*.s

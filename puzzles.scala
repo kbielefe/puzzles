@@ -428,4 +428,5 @@ def eContinuedFractionTerms = new Iterator[BigInt] {
       1
   }
 }
+
 }
