@@ -17,7 +17,8 @@ object Rover {
 
   def main(args: Array[String]): Unit = {
     val initialPosition = Position(0, 0, 'N')
-    val result = args(0).filter("LRM" contains _).foldLeft(initialPosition)(command)
+    val commands = args.lift(0) getOrElse "" map (_.toUpper) filter ("LRM" contains _)
+    val result = commands.foldLeft(initialPosition)(command)
     println(result)
   }
 }
