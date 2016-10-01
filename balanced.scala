@@ -1,12 +1,10 @@
 def balanced(input: String): Boolean = {
-  val balance = input.foldLeft[Option[Int]](Some(0)){
-      case (    Some(0), ')') => None
-      case (Some(count), '(') => Some(count + 1)
-      case (Some(count), ')') => Some(count - 1)
-      case (Some(count),  _ ) => Some(count)
-      case (None,         _ ) => None
+  val balances = input.scanLeft(0){
+      case (count, '(') => count + 1
+      case (count, ')') => count - 1
+      case (count,  _ ) => count
   }
-  balance == Some(0)
+  balances.last == 0 && !balances.contains(-1)
 }
 
 println(balanced("Are (these) ((parentheses) (balanced))?"))
