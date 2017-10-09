@@ -4,14 +4,13 @@ object Rover {
 
   val turns = Map('L' -> left, 'R' -> right)
 
-  val moves = Map('N' -> (0,  1), 'E' -> ( 1, 0),
-                  'S' -> (0, -1), 'W' -> (-1, 0))
+  val xOff = Map('N' -> 0, 'S' -> 0, 'E' -> 1, 'W' -> -1)
+  val yOff = Map('E' -> 0, 'W' -> 0, 'N' -> 1, 'S' -> -1)
 
   case class Position(x: Int, y: Int, dir: Char)
 
   def command(pos: Position, cmd: Char): Position = (pos, cmd) match {
-    case (Position(x, y, dir), 'M')  => val (xOffset, yOffset) = moves(dir)
-                                        Position(x + xOffset, y + yOffset, dir)
+    case (Position(x, y, dir), 'M')  => Position(x + xOff(dir), y + yOff(dir), dir)
     case (Position(x, y, dir), turn) => Position(x, y, turns(turn)(dir))
   }
 
