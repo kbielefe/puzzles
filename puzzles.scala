@@ -106,10 +106,10 @@ object WordNumbers {
   private val digitWords = Array("", "one", "two", "three", "four", "five", "six",
     "seven", "eight", "nine")
 
-  private val teenWords = Array("ten", "eleven", "twelve", "thirteen", "fourteen", 
+  private val teenWords = Array("ten", "eleven", "twelve", "thirteen", "fourteen",
     "fifteen", "sixteen", "seventeen", "eighteen", "nineteen")
 
-  private val tensWords = Array("", "ten", "twenty", "thirty", "forty", "fifty", 
+  private val tensWords = Array("", "ten", "twenty", "thirty", "forty", "fifty",
     "sixty", "seventy", "eighty", "ninety")
 
   private def thousands(n: Int) = {
@@ -123,7 +123,7 @@ object WordNumbers {
   private def hundreds(n: Int) = {
     val digit = n % 1000 / 100
     if (digit > 0)
-      digitWords(digit) ++ " hundred " 
+      digitWords(digit) ++ " hundred "
     else
       ""
   }
@@ -256,7 +256,7 @@ def intToRoman(number: Int): String = {
     (4,    "IV"),
     (1,    "I"))
 
-  val (decimal, roman) = 
+  val (decimal, roman) =
     (conversions dropWhile (_._1 > number)).head
 
   roman + intToRoman(number - decimal)
@@ -332,21 +332,21 @@ def pandigital(n: ((BigDecimal, Int), Int)) = n match {
 // http://www.codecodex.com/wiki/Calculate_an_integer_square_root
 def sqrt(number : BigInt) = {
   def next(n : BigInt, i : BigInt) : BigInt = (n + i/n) >> 1
- 
+
   val one = BigInt(1)
- 
+
   var n = one
   var n1 = next(n, number)
-     
+
   while ((n1 - n).abs > one) {
     n = n1
     n1 = next(n, number)
   }
-      
+
   while (n1 * n1 > number) {
     n1 -= one
   }
-      
+
   n1
 }
 
@@ -380,12 +380,12 @@ def isHexagonal(n: BigInt) = naturalQuadratic(2, -1, -n)
 
 def isTriangular(n: BigInt) = naturalQuadratic(1, 1, -2*n)
 
-// Figure out better way to do 
+// Figure out better way to do
 // res0 map ((x) => x map ((y) => y.toInt))
 
 // Generates a sequence based on parameters from
 // http://www.alpertron.com.ar/QUAD.HTM
-def diophantine(x0: BigInt, y0: BigInt, 
+def diophantine(x0: BigInt, y0: BigInt,
   p: BigInt, q: BigInt, k: BigInt, r: BigInt,
   s: BigInt, l: BigInt) = {
 
